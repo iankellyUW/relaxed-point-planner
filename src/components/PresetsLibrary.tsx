@@ -48,6 +48,22 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
     return breakdown;
   };
 
+  const getTimeRange = (preset: Preset) => {
+    if (preset.activities.length === 0) return null;
+    
+    const startTimes = preset.activities.map(a => a.startTime);
+    const endTimes = preset.activities.map(a => a.endTime);
+    
+    const earliestStart = startTimes.reduce((earliest, current) => 
+      current < earliest ? current : earliest
+    );
+    const latestEnd = endTimes.reduce((latest, current) => 
+      current > latest ? current : latest
+    );
+    
+    return { start: earliestStart, end: latestEnd };
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -68,6 +84,7 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
           {presets.map((preset) => {
             const categoryBreakdown = getCategoryBreakdown(preset);
             const totalPoints = getTotalPoints(preset);
+            const timeRange = getTimeRange(preset);
             
             return (
               <Card key={preset.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -120,13 +137,12 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                   </div>
 
                   {/* Time Range */}
-                  {preset.activities.length > 0 && (
+                  {timeRange && (
                     <div className="text-sm text-slate-600">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3 h-3" />
                         <span>
-                          {formatTime(Math.min(...preset.activities.map(a => a.startTime)))} - {' '}
-                          {formatTime(Math.max(...preset.activities.map(a => a.endTime)))}
+                          {formatTime(timeRange.start)} - {formatTime(timeRange.end)}
                         </span>
                       </div>
                     </div>
