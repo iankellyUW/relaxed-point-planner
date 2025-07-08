@@ -1,21 +1,27 @@
-
-import React from 'react';
-import { Calendar, Trash2, Edit, Copy, Heart, Zap, Coffee, Sunset } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Calendar, Trash2, Edit, Copy, Heart, Zap, Coffee, Sunset, Download, Upload, FolderOpen } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Preset, categoryColors, categoryLightColors } from '../types/scheduler';
+import { exportPresetToCSV, exportPresetsToCSV, downloadCSV, parseCSVToPresets } from '../utils/csvOperations';
 
 interface PresetsLibraryProps {
   presets: Preset[];
   onLoadPreset: (preset: Preset) => void;
   onDeletePreset: (id: string) => void;
+  onDuplicatePreset: (preset: Preset) => void;
+  onImportPresets: (presets: Preset[]) => void;
 }
 
 const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
   presets,
   onLoadPreset,
-  onDeletePreset
+  onDeletePreset,
+  onDuplicatePreset,
+  onImportPresets
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours);
@@ -64,12 +70,79 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
     return { start: earliestStart, end: latestEnd };
   };
 
+  const handleExportAll = () => {
+    if (presets.length === 0) return;
+    const csvContent = exportPresetsToCSV(presets);
+    downloadCSV(csvContent, `relaxed-scheduler-presets-${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const handleExportPreset = (preset: Preset) => {
+    const csvContent = exportPresetToCSV(preset);
+    downloadCSV(csvContent, `preset-${preset.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`);
+  };
+
+  const handleImportCSV = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const csvContent = e.target?.result as string;
+        const importedPresets = parseCSVToPresets(csvContent);
+        if (importedPresets.length > 0) {
+          onImportPresets(importedPresets);
+        }
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    event.target.value = '';
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">Presets Library</h2>
-        <p className="text-slate-600">Saved schedules you can quickly load and customize</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Presets Library</h2>
+          <p className="text-slate-600">Saved schedules you can quickly load and customize</p>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button
+            onClick={handleImportCSV}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Import CSV
+          </Button>
+          <Button
+            onClick={handleExportAll}
+            variant="outline"
+            disabled={presets.length === 0}
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export All
+          </Button>
+        </div>
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        className="hidden"
+      />
 
       {presets.length === 0 ? (
         <Card className="p-12">
@@ -170,10 +243,42 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                   <div className="flex gap-2">
                     <Button
                       onClick={() => onLoadPreset(preset)}
+                      size="sm"
                       className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
                     >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Load & Edit
+                      <FolderOpen className="w-4 h-4 mr-1" />
+                      Load
+                    </Button>
+                    <Button
+                      onClick={() => onLoadPreset(preset)}
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+
+                  {/* Secondary Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => onDuplicatePreset(preset)}
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Duplicate
+                    </Button>
+                    <Button
+                      onClick={() => handleExportPreset(preset)}
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Export CSV
                     </Button>
                   </div>
 

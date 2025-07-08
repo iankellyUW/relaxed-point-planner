@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, Settings, Trophy, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -108,6 +107,24 @@ const RelaxedScheduler = () => {
     setPresets(presets.filter(preset => preset.id !== id));
   };
 
+  const duplicatePreset = (preset: Preset) => {
+    const duplicatedPreset: Preset = {
+      ...preset,
+      id: Date.now().toString(),
+      name: `${preset.name} (Copy)`,
+      createdAt: new Date().toISOString(),
+      activities: preset.activities.map(activity => ({
+        ...activity,
+        id: Date.now().toString() + Math.random().toString()
+      }))
+    };
+    setPresets([...presets, duplicatedPreset]);
+  };
+
+  const importPresets = (importedPresets: Preset[]) => {
+    setPresets([...presets, ...importedPresets]);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -178,6 +195,8 @@ const RelaxedScheduler = () => {
             presets={presets}
             onLoadPreset={loadPreset}
             onDeletePreset={deletePreset}
+            onDuplicatePreset={duplicatePreset}
+            onImportPresets={importPresets}
           />
         )}
       </main>
