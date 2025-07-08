@@ -7,6 +7,7 @@ import TodayView from './TodayView';
 import PresetsLibrary from './PresetsLibrary';
 import PointsDisplay from './PointsDisplay';
 import { Activity, Preset, CompletedTask } from '../types/scheduler';
+import { CalendarSyncService } from '../services/calendarSync';
 
 const RelaxedScheduler = () => {
   const [currentView, setCurrentView] = useState<'today' | 'builder' | 'presets'>('today');
@@ -14,6 +15,16 @@ const RelaxedScheduler = () => {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [completedTasks, setCompletedTasks] = useState<CompletedTask[]>([]);
+
+  // Initialize mobile services
+  useEffect(() => {
+    const initializeMobileServices = async () => {
+      const calendarService = CalendarSyncService.getInstance();
+      await calendarService.initializeNotifications();
+    };
+    
+    initializeMobileServices();
+  }, []);
 
   // Load data from localStorage on mount
   useEffect(() => {
