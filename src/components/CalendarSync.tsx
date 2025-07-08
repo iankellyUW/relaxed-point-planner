@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Calendar, Smartphone, Bell, CheckCircle, AlertCircle, Sync } from 'lucide-react';
+import { Calendar, Smartphone, Bell, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -195,7 +194,7 @@ const CalendarSync: React.FC<CalendarSyncProps> = ({ activities }) => {
           >
             {isSyncing ? (
               <>
-                <Sync className="w-4 h-4 mr-2 animate-spin" />
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 Syncing...
               </>
             ) : (
