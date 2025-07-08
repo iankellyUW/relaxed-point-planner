@@ -11,6 +11,7 @@ interface PresetsLibraryProps {
   onDeletePreset: (id: string) => void;
   onDuplicatePreset: (preset: Preset) => void;
   onImportPresets: (presets: Preset[]) => void;
+  onEditPreset: (preset: Preset) => void;
 }
 
 const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
@@ -18,7 +19,8 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
   onLoadPreset,
   onDeletePreset,
   onDuplicatePreset,
-  onImportPresets
+  onImportPresets,
+  onEditPreset
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -162,7 +164,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
             return (
               <Card key={preset.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="space-y-4">
-                  {/* Header */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 flex-1">
                       <div className="p-2 bg-blue-100 rounded-lg">
@@ -185,7 +186,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     </Button>
                   </div>
 
-                  {/* Stats */}
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-600">
                       {preset.activities.length} activities
@@ -195,7 +195,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     </span>
                   </div>
 
-                  {/* Category Pills */}
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(categoryBreakdown).map(([category, count]) => (
                       <span
@@ -209,7 +208,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     ))}
                   </div>
 
-                  {/* Time Range */}
                   {timeRange && (
                     <div className="text-sm text-slate-600">
                       <div className="flex items-center gap-2">
@@ -221,7 +219,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     </div>
                   )}
 
-                  {/* Activities Preview */}
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {preset.activities.slice(0, 3).map((activity, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm">
@@ -239,7 +236,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-2">
                     <Button
                       onClick={() => onLoadPreset(preset)}
@@ -250,7 +246,7 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                       Load
                     </Button>
                     <Button
-                      onClick={() => onLoadPreset(preset)}
+                      onClick={() => onEditPreset(preset)}
                       size="sm"
                       variant="outline"
                       className="flex-1"
@@ -260,7 +256,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     </Button>
                   </div>
 
-                  {/* Secondary Actions */}
                   <div className="flex gap-2">
                     <Button
                       onClick={() => onDuplicatePreset(preset)}
@@ -282,7 +277,6 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                     </Button>
                   </div>
 
-                  {/* Created Date */}
                   <p className="text-xs text-slate-400 text-center">
                     Created {new Date(preset.createdAt).toLocaleDateString()}
                   </p>

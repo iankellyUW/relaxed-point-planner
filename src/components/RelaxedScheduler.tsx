@@ -103,6 +103,16 @@ const RelaxedScheduler = () => {
     setCurrentView('builder');
   };
 
+  const editPreset = (preset: Preset) => {
+    setActivities(preset.activities.map(activity => ({
+      ...activity,
+      id: Date.now().toString() + Math.random().toString()
+    })));
+    // Remove the existing preset since we'll be editing it
+    setPresets(presets.filter(p => p.id !== preset.id));
+    setCurrentView('builder');
+  };
+
   const deletePreset = (id: string) => {
     setPresets(presets.filter(preset => preset.id !== id));
   };
@@ -194,6 +204,7 @@ const RelaxedScheduler = () => {
           <PresetsLibrary
             presets={presets}
             onLoadPreset={loadPreset}
+            onEditPreset={editPreset}
             onDeletePreset={deletePreset}
             onDuplicatePreset={duplicatePreset}
             onImportPresets={importPresets}
