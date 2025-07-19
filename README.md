@@ -16,11 +16,6 @@ A Flutter/React-based productivity app with Google Calendar integration and gami
 - Color-coded events by category
 - Real-time synchronization
 
-### ✅ **Smart Notifications**
-- Local notifications 15 minutes before each activity
-- Cross-platform notification support
-- Notification permission management
-
 ### ✅ **Presets Library**
 - Save and reuse common schedules
 - Duplicate and edit existing presets
@@ -28,8 +23,6 @@ A Flutter/React-based productivity app with Google Calendar integration and gami
 
 ### ✅ **Persistent Data Storage**
 - All data saved locally on device
-- Cross-platform data persistence
-- Automatic data migration
 
 ## Setup Instructions
 
@@ -113,8 +106,7 @@ npx cap open android
    - Start and end times
    - Color coding by category
    - Points and category information in description
-3. **Sync Status**: Tracks last sync date and synced activities
-4. **Offline Support**: Local notifications work even without internet
+3. **Offline Support**: Local notifications work even without internet
 
 ### Event Categories:
 - **Fitness** (Red): Workouts, sports, physical activities
@@ -186,33 +178,5 @@ src/
 - Access tokens are stored securely using Capacitor Preferences
 - Automatic token refresh when expired
 - Secure credential storage and retrieval
-
-## Troubleshooting
-
-### Google Calendar Connection Issues:
-1. **Invalid Client ID**: Check that `REACT_APP_GOOGLE_CLIENT_ID` is correct
-2. **Unauthorized Domain**: Add your domain to authorized JavaScript origins
-3. **Scope Issues**: Ensure calendar scopes are properly configured
-4. **Token Expired**: The app automatically refreshes tokens
-
-### Android Issues:
-1. **Notifications Not Working**: Enable notification permissions in device settings
-2. **Build Errors**: Run `npx cap sync android` after dependency changes
-3. **USB Debugging**: Enable developer options on Android device
-
-### Development Issues:
-1. **Environment Variables**: Make sure `.env` file is in project root
-2. **CORS Errors**: Add localhost to authorized origins in Google Cloud Console
-3. **Module Errors**: Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
+  
 This project is licensed under the MIT License.
