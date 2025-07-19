@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Relaxed Point Planner</string>
+    <string name="title_activity_main">Relaxed Point Planner</string>
+    <string name="package_name">com.relaxedpointplanner.app</string>
+    <string name="custom_url_scheme">com.relaxedpointplanner.app</string>
+    <string name="server_client_id">628459676626-ke3m7uh8i0c53s9gmjggkuuatenuho15.apps.googleusercontent.com</string>
+</resources>

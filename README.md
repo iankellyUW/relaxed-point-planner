@@ -1,73 +1,218 @@
-# Welcome to your Lovable project
+# Relaxed Point Planner
 
-## Project info
+A Flutter/React-based productivity app with Google Calendar integration and gamified scheduling.
 
-**URL**: https://lovable.dev/projects/19585e7f-7a0f-47a2-bc85-c95d9099f4ed
+## Features
 
-## How can I edit this code?
+### ✅ **Activity Scheduling**
+- Create and manage daily activities with points
+- Color-coded categories (Fitness, Work, Leisure, Recovery)
+- Time-based scheduling with start/end times
+- Track completed tasks and earn points
 
-There are several ways of editing your application.
+### ✅ **Google Calendar Sync**
+- Connect your Google Calendar account
+- Sync activities as calendar events
+- Color-coded events by category
+- Real-time synchronization
 
-**Use Lovable**
+### ✅ **Smart Notifications**
+- Local notifications 15 minutes before each activity
+- Cross-platform notification support
+- Notification permission management
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/19585e7f-7a0f-47a2-bc85-c95d9099f4ed) and start prompting.
+### ✅ **Presets Library**
+- Save and reuse common schedules
+- Duplicate and edit existing presets
+- Quick-load preset schedules
 
-Changes made via Lovable will be committed automatically to this repo.
+### ✅ **Persistent Data Storage**
+- All data saved locally on device
+- Cross-platform data persistence
+- Automatic data migration
 
-**Use your preferred IDE**
+## Setup Instructions
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
+- Node.js (v18 or higher)
+- Android Studio (for Android builds)
+- Google Cloud Console account
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 1. Install Dependencies
+```bash
+npm install
 ```
 
-**Edit a file directly in GitHub**
+### 2. Google Calendar API Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Create a Google Cloud Project**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select an existing one
 
-**Use GitHub Codespaces**
+2. **Enable Google Calendar API**
+   - Navigate to APIs & Services > Library
+   - Search for "Google Calendar API"
+   - Click "Enable"
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. **Create OAuth 2.0 Credentials**
+   - Go to APIs & Services > Credentials
+   - Click "Create Credentials" > "OAuth Client ID"
+   - Choose "Web application"
+   - Add authorized JavaScript origins:
+     - `http://localhost:5173` (for development)
+     - Your production domain
+   - Download the credentials JSON
 
-## What technologies are used for this project?
+4. **Configure Environment Variables**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and add your Google OAuth credentials:
+   ```
+   REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
+   REACT_APP_GOOGLE_CLIENT_SECRET=your_google_client_secret
+   ```
 
-This project is built with:
+### 3. Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+# Start development server
+npm run dev
 
-## How can I deploy this project?
+# Build for production
+npm run build
 
-Simply open [Lovable](https://lovable.dev/projects/19585e7f-7a0f-47a2-bc85-c95d9099f4ed) and click on Share -> Publish.
+# Android development
+npx cap sync android
+npx cap open android
+```
 
-## Can I connect a custom domain to my Lovable project?
+### 4. Android Build
 
-Yes, you can!
+1. **Sync Capacitor**
+   ```bash
+   npx cap sync android
+   ```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+2. **Open in Android Studio**
+   ```bash
+   npx cap open android
+   ```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+3. **Build and Run**
+   - Connect your Android device
+   - Enable USB debugging
+   - Click Run in Android Studio
+
+## Google Calendar Integration
+
+### How it works:
+1. **Authentication**: Uses Google OAuth 2.0 for secure authentication
+2. **Event Creation**: Activities are created as calendar events with:
+   - Title and description
+   - Start and end times
+   - Color coding by category
+   - Points and category information in description
+3. **Sync Status**: Tracks last sync date and synced activities
+4. **Offline Support**: Local notifications work even without internet
+
+### Event Categories:
+- **Fitness** (Red): Workouts, sports, physical activities
+- **Work** (Blue): Meetings, tasks, professional activities
+- **Leisure** (Yellow): Entertainment, hobbies, social activities
+- **Recovery** (Green): Rest, meditation, self-care
+
+### Permissions Required:
+- `https://www.googleapis.com/auth/calendar`
+- `https://www.googleapis.com/auth/calendar.events`
+
+## Architecture
+
+### Frontend
+- **React 18** with TypeScript
+- **Tailwind CSS** for styling
+- **Radix UI** components
+- **React Router** for navigation
+- **React Query** for state management
+
+### Mobile
+- **Capacitor** for native mobile functionality
+- **Local Notifications** API
+- **Preferences** API for data persistence
+- **Clipboard** API for enhanced UX
+
+### Services
+- **CalendarSyncService**: Handles Google Calendar integration
+- **DataPersistenceService**: Manages local data storage
+- **NotificationService**: Manages local notifications
+
+## File Structure
+
+```
+src/
+├── components/
+│   ├── CalendarSync.tsx       # Google Calendar integration UI
+│   ├── PresetsLibrary.tsx     # Preset management
+│   ├── RelaxedScheduler.tsx   # Main app component
+│   ├── ScheduleBuilder.tsx    # Activity creation/editing
+│   ├── TodayView.tsx          # Daily schedule view
+│   └── ui/                    # Reusable UI components
+├── services/
+│   ├── calendarSync.ts        # Google Calendar API integration
+│   └── dataPersistence.ts     # Local data management
+├── types/
+│   └── scheduler.ts           # TypeScript interfaces
+└── utils/
+    └── (utility functions)
+```
+
+## Google Calendar API Integration
+
+### Authentication Flow:
+1. User clicks "Connect Google Calendar"
+2. Google OAuth popup appears
+3. User authorizes the app
+4. Access token is stored securely
+5. Connection status is updated
+
+### Event Synchronization:
+1. User clicks "Sync Activities"
+2. Each activity is created as a calendar event
+3. Events are color-coded by category
+4. Local notifications are scheduled
+5. Sync status is saved locally
+
+### Token Management:
+- Access tokens are stored securely using Capacitor Preferences
+- Automatic token refresh when expired
+- Secure credential storage and retrieval
+
+## Troubleshooting
+
+### Google Calendar Connection Issues:
+1. **Invalid Client ID**: Check that `REACT_APP_GOOGLE_CLIENT_ID` is correct
+2. **Unauthorized Domain**: Add your domain to authorized JavaScript origins
+3. **Scope Issues**: Ensure calendar scopes are properly configured
+4. **Token Expired**: The app automatically refreshes tokens
+
+### Android Issues:
+1. **Notifications Not Working**: Enable notification permissions in device settings
+2. **Build Errors**: Run `npx cap sync android` after dependency changes
+3. **USB Debugging**: Enable developer options on Android device
+
+### Development Issues:
+1. **Environment Variables**: Make sure `.env` file is in project root
+2. **CORS Errors**: Add localhost to authorized origins in Google Cloud Console
+3. **Module Errors**: Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

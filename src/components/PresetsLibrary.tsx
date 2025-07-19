@@ -1,28 +1,70 @@
-import React, { useRef } from 'react';
-import { Calendar, Trash2, Edit, Copy, Heart, Zap, Coffee, Sunset, Download, Upload, FolderOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Trash2, Edit, Copy, Heart, Zap, Coffee, Sunset, FolderOpen, Search, BarChart3 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Preset, categoryColors, categoryLightColors } from '../types/scheduler';
-import { exportPresetToCSV, exportPresetsToCSV, downloadCSV, parseCSVToPresets } from '../utils/csvOperations';
+import { DataPersistenceService } from '../services/dataPersistence';
 
 interface PresetsLibraryProps {
   presets: Preset[];
+  loadedPresetId: string | null;
   onLoadPreset: (preset: Preset) => void;
   onDeletePreset: (id: string) => void;
   onDuplicatePreset: (preset: Preset) => void;
-  onImportPresets: (presets: Preset[]) => void;
   onEditPreset: (preset: Preset) => void;
 }
 
 const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
   presets,
+  loadedPresetId,
   onLoadPreset,
   onDeletePreset,
   onDuplicatePreset,
-  onImportPresets,
   onEditPreset
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredPresets, setFilteredPresets] = useState<Preset[]>(presets);
+  const [stats, setStats] = useState<{ totalPresets: number; totalActivities: number }>({ 
+    totalPresets: 0, 
+    totalActivities: 0 
+  });
+
+  // Update filtered presets when presets or search term changes
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredPresets(presets);
+    } else {
+      const filtered = presets.filter(preset => 
+        preset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        preset.mood?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        preset.activities.some(activity => 
+          activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          activity.category.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+      setFilteredPresets(filtered);
+    }
+  }, [presets, searchTerm]);
+
+  // Load stats from SQLite
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const dataService = DataPersistenceService.getInstance();
+        // Try to get stats from SQLite, fallback to counting current presets
+        const totalActivities = presets.reduce((sum, preset) => sum + preset.activities.length, 0);
+        setStats({
+          totalPresets: presets.length,
+          totalActivities
+        });
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    };
+    
+    loadStats();
+  }, [presets]);
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':');
@@ -72,42 +114,7 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
     return { start: earliestStart, end: latestEnd };
   };
 
-  const handleExportAll = () => {
-    if (presets.length === 0) return;
-    const csvContent = exportPresetsToCSV(presets);
-    downloadCSV(csvContent, `relaxed-scheduler-presets-${new Date().toISOString().split('T')[0]}.csv`);
-  };
 
-  const handleExportPreset = (preset: Preset) => {
-    const csvContent = exportPresetToCSV(preset);
-    downloadCSV(csvContent, `preset-${preset.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`);
-  };
-
-  const handleImportCSV = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const csvContent = e.target?.result as string;
-        const importedPresets = parseCSVToPresets(csvContent);
-        if (importedPresets.length > 0) {
-          onImportPresets(importedPresets);
-        }
-      } catch (error) {
-        console.error('Error parsing CSV:', error);
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset input
-    event.target.value = '';
-  };
 
   return (
     <div className="space-y-6">
@@ -117,34 +124,31 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
           <p className="text-slate-600">Saved schedules you can quickly load and customize</p>
         </div>
         
-        <div className="flex gap-2">
-          <Button
-            onClick={handleImportCSV}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Import CSV
-          </Button>
-          <Button
-            onClick={handleExportAll}
-            variant="outline"
-            disabled={presets.length === 0}
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export All
-          </Button>
+        {/* Stats */}
+        <div className="flex items-center gap-4 text-sm text-slate-600">
+          <div className="flex items-center gap-1">
+            <BarChart3 className="w-4 h-4" />
+            <span>{stats.totalPresets} presets</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            <span>{stats.totalActivities} activities</span>
+          </div>
         </div>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      {/* Search */}
+      {presets.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            placeholder="Search presets by name, mood, or activities..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      )}
 
       {presets.length === 0 ? (
         <Card className="p-12">
@@ -154,9 +158,24 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
             <p className="text-slate-600 mb-4">Create your first schedule in the Schedule Builder and save it as a preset</p>
           </div>
         </Card>
+      ) : filteredPresets.length === 0 ? (
+        <Card className="p-12">
+          <div className="text-center">
+            <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-800 mb-2">No matching presets</h3>
+            <p className="text-slate-600 mb-4">Try a different search term or browse all presets</p>
+            <Button
+              variant="outline"
+              onClick={() => setSearchTerm('')}
+              className="mt-2"
+            >
+              Clear Search
+            </Button>
+          </div>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {presets.map((preset) => {
+          {filteredPresets.map((preset) => {
             const categoryBreakdown = getCategoryBreakdown(preset);
             const totalPoints = getTotalPoints(preset);
             const timeRange = getTimeRange(preset);
@@ -166,11 +185,22 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="p-2 bg-blue-100 rounded-lg">
+                      <div className={`p-2 rounded-lg ${
+                        loadedPresetId === preset.id 
+                          ? 'bg-green-100 border-2 border-green-300' 
+                          : 'bg-blue-100'
+                      }`}>
                         {getMoodIcon(preset.mood)}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-slate-800 truncate">{preset.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-800 truncate">{preset.name}</h3>
+                          {loadedPresetId === preset.id && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                              Loaded
+                            </span>
+                          )}
+                        </div>
                         {preset.mood && (
                           <p className="text-sm text-slate-500">{preset.mood}</p>
                         )}
@@ -238,7 +268,10 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
 
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => onLoadPreset(preset)}
+                      onClick={() => {
+                        console.log('Load button clicked for preset:', preset.name, 'ID:', preset.id);
+                        onLoadPreset(preset);
+                      }}
                       size="sm"
                       className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
                     >
@@ -267,13 +300,13 @@ const PresetsLibrary: React.FC<PresetsLibraryProps> = ({
                       Duplicate
                     </Button>
                     <Button
-                      onClick={() => handleExportPreset(preset)}
+                      onClick={() => onDeletePreset(preset.id)}
                       size="sm"
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 text-red-600 hover:text-red-700"
                     >
-                      <Download className="w-4 h-4 mr-1" />
-                      Export CSV
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
                     </Button>
                   </div>
 

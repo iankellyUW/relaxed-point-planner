@@ -45,14 +45,14 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
       startTime: '',
       endTime: '',
       category: 'Work',
-      points: 10,
+      points: 0,
       description: ''
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const activity: Activity = {
       id: editingActivity?.id || Date.now().toString(),
       ...formData,
@@ -179,7 +179,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
 
             <div>
               <Label htmlFor="category">Category</Label>
-              <Select value={formData.category} onValueChange={(value: Activity['category']) => 
+              <Select value={formData.category} onValueChange={(value: Activity['category']) =>
                 setFormData({ ...formData, category: value })
               }>
                 <SelectTrigger>
@@ -217,14 +217,25 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="points">Points</Label>
+              <Label htmlFor="points">Points (0-1000)</Label>
               <Input
                 id="points"
                 type="number"
-                min="1"
-                max="100"
-                value={formData.points}
-                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) || 10 })}
+                max="1000"
+                min="0"
+                value={formData.points || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setFormData({ ...formData, points: undefined });
+                  } else {
+                    const numValue = parseInt(value);
+                    if (!isNaN(numValue) && numValue >= 0 && numValue <= 1000) {
+                      setFormData({ ...formData, points: numValue });
+                    }
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 required
               />
             </div>
@@ -243,9 +254,9 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
               <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
                 {editingActivity ? 'Update Activity' : 'Add Activity'}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setIsAddingActivity(false);
                   setEditingActivity(null);
@@ -262,7 +273,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
       {/* Activities List */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">Your Activities</h3>
-        
+
         {activities.length === 0 ? (
           <div className="text-center py-12">
             <Clock className="w-12 h-12 text-slate-400 mx-auto mb-4" />
@@ -292,7 +303,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"

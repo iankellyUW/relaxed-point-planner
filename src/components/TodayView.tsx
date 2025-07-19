@@ -3,12 +3,14 @@ import React from 'react';
 import { Clock, Trophy, Calendar } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, CompletedTask, categoryColors, categoryLightColors } from '../types/scheduler';
+import { Activity, CompletedTask, Preset, categoryColors, categoryLightColors } from '../types/scheduler';
 import CalendarSync from './CalendarSync';
 
 interface TodayViewProps {
   activities: Activity[];
   completedTasks: CompletedTask[];
+  loadedPresetId: string | null;
+  presets: Preset[];
   onCompleteTask: (activityId: string, points: number) => void;
   onUncompleteTask: (activityId: string, points: number) => void;
 }
@@ -16,6 +18,8 @@ interface TodayViewProps {
 const TodayView: React.FC<TodayViewProps> = ({
   activities,
   completedTasks,
+  loadedPresetId,
+  presets,
   onCompleteTask,
   onUncompleteTask
 }) => {
@@ -49,6 +53,14 @@ const TodayView: React.FC<TodayViewProps> = ({
             month: 'long', 
             day: 'numeric' 
           })}</p>
+          {loadedPresetId && (
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-slate-500">Loaded preset:</span>
+              <span className="text-sm font-medium text-blue-600">
+                {presets.find(p => p.id === loadedPresetId)?.name || 'Unknown'}
+              </span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white px-4 py-2 rounded-lg">
