@@ -1,4 +1,4 @@
-# Relaxed Point Planner
+# Relaxed Scheduler
 
 A Flutter/React-based productivity app with Google Calendar integration and gamified scheduling.
 
